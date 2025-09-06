@@ -72,7 +72,7 @@ os.makedirs("logs", exist_ok=True)
 import sys
 import logging
 logging.basicConfig(
-    level=logging.CRITICAL,
+    level=logging.DEBUG,
     format="%(asctime)s | %(levelname)-8s | %(name)s | %(message)s",
     datefmt='%Y-%m-%d %H:%M:%S',
     handlers=[
@@ -348,16 +348,25 @@ class InfoBuddyServer:
             return ""
         
     def _escape_json_content(self, content: str) -> str:
-        """
-        Escape content for safe JSON transmission.
+        """Safely escape content for JSON transmission."""
+        if not content:
+            return ""
         
-        Args:
-            content: Raw content string
-            
-        Returns:
-            JSON-safe escaped string
-        """
-        return content.replace('"', '\\"').replace("'", "\\'").replace("\n", "\\n")
+        try:
+            # Use json.dumps to properly escape the content
+            import json
+            # This will properly escape all special characters
+            escaped = json.dumps(content)[1:-1]  # Remove the surrounding quotes
+            return escaped
+        except Exception as e:
+            logger.error(f"❌ JSON escape error: {e}")
+            # Fallback: manual escaping
+            return (content
+                    .replace('\\', '\\\\')  # Escape backslashes first
+                    .replace('"', '\\"')    # Escape quotes
+                    .replace('\n', '\\n')   # Escape newlines
+                    .replace('\r', '\\r')   # Escape carriage returns
+                    .replace('\t', '\\t'))  # Escape tabs
     
     def visualize_conversation_workflow(self) -> None:
         """ Visualize the conversation workflow graph"""
@@ -453,7 +462,7 @@ class InfoBuddyServer:
     ) -> AsyncGenerator[str, None]:
         """Process individual graph events and yield appropriate responses."""
         event_type = event.get('event', '')  
-        logger.debug(f"‼️ graph event in _process_graph_event: {event_type}")
+        logger.info(f"🔍 Processing graph event: {event_type}")  
         
         try:
             if event_type == 'on_chat_model_stream':
@@ -462,6 +471,7 @@ class InfoBuddyServer:
                     chunk_content = getattr(chunk, 'content', '')
                     if chunk_content:
                         safe_chunk = self._escape_json_content(chunk_content)
+                        logger.info(f"📤 Sending content chunk: {chunk_content}")  
                         yield f'data: {{"type": "message_chunk", "content": "{safe_chunk}"}}\n\n'
 
             elif event_type == 'on_chat_model_end':
@@ -471,16 +481,16 @@ class InfoBuddyServer:
                 if search_calls:
                     search_query = search_calls[0].get("args", {}).get("query", "")
                     safe_query = self._escape_json_content(search_query)
+                    logger.info(f"📤 Sending search_start: {search_query}")  
                     yield f'data: {{"type": "search_start", "query": "{safe_query}"}}\n\n'
-                    logger.info(f"🔍 Search initiated: {search_query}")
 
             elif event_type == "on_tool_end" and event.get("name") == "tavily_search_results_json":
                 output = event.get("data", {}).get("output")
                 if isinstance(output, list):
                     urls = [item.get("url") for item in output if isinstance(item, dict) and "url" in item]
                     urls_json = json.dumps(urls)
+                    logger.info(f"📤 Sending search_results: {len(urls)} URLs")  # ✅ Added debug log
                     yield f'data: {{"type": "search_results", "urls": {urls_json}}}\n\n'
-                    logger.info(f"🔍 Search results sent: {len(urls)} URLs")
                     
         except Exception as e:
             logger.error(f"❌ Error processing graph event: {e}")
