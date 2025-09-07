@@ -39,79 +39,50 @@ InfoBuddy.AI is a full-stack, production-ready conversational AI application fea
 
 ---
 
-## 📂 Project Structure
-
-The project is organized into two main directories:
-
-```
-InfoBuddy.AI/
-├── client/         # Next.js frontend application
-│   ├── src/
-│   └── ...
-└── server/         # FastAPI backend application
-    ├── app.py
-    └── ...
-```
-
----
-
 ## 🚀 Getting Started
 
-Follow these steps to set up and run the project locally.
+You can run this project using Docker.
 
 ### Prerequisites
 
-- **Node.js** (v18.x or later)
-- **Python** (v3.10 or later)
+- **Docker & Docker Compose** (for the Docker method)
+- **Node.js** (v18.x or later, for the local dev method)
+- **Python** (v3.10 or later, for the local dev method)
 - **API Keys** for:
   - Google (for Gemini)
   - Tavily AI
 
-### 1. Create a virtual environment
+### Running with Docker
+
+**1. Set up Environment Variables:**
+
+- In the `server/` directory, copy `.env.example` to `.env` and add your `GOOGLE_API_KEY` and `TAVILY_API_KEY`.
+- The `client/` directory is pre-configured to connect to the server at `http://localhost:8000` when run via Docker Compose. No changes are needed there.
+
+**2. Build and Run the Application:**
+
+Open your terminal at the root of the project and run:
 
 ```bash
-uv venv
-source venv/bin/activate
-uv pip install -r requirements.txt
+docker-compose up --build
 ```
 
-### 2. Backend Setup (Server)
+This command will:
 
-First, set up and run the FastAPI server.
+- Build the Docker images for both the client and server.
+- Start the containers.
+- Connect them on a shared Docker network.
 
-```bash
-# 1. Navigate to the server directory
-cd server
+The application will be available at:
 
-# 2. Set up environment variables
-# refer .env.example and enter your api keys
+- **Frontend:** `http://localhost:3000`
+- **Backend:** `http://localhost:8000`
 
-# 3. Run the server
-# For development with auto-reload:
-uvicorn app:app --host 0.0.0.0 --port 8000 --reload
-```
+**Common Docker Commands:**
 
-The server will be running at `http://localhost:8000`.
-
-### 3. Frontend Setup (Client)
-
-Next, set up and run the Next.js client in a separate terminal.
-
-```bash
-# 1. Navigate to the client directory
-cd client
-
-# 2. Install Node.js dependencies
-npm install
-
-# 3. Set up environment variables
-# refer .env.example and enter your api keys
-
-# 4. Run the client
-npm run dev
-```
-
-The client will be running at `http://localhost:3000`. Open this URL in your browser to start chatting!
+- **Start:** `docker-compose up -d` (runs in detached mode)
+- **Stop:** `docker-compose down`
+- **View Logs:** `docker-compose logs -f`
 
 ---
 

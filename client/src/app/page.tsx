@@ -3,7 +3,7 @@
 import Header from "@/components/Header";
 import InputBar from "@/components/InputBar";
 import MessageArea from "@/components/MessageArea";
-import React, { useState, useEffect } from "react";
+import React, { useState, FormEvent } from "react";
 
 // global variables
 const serverUrl = process.env.NEXT_PUBLIC_SERVER_URL;
@@ -40,9 +40,9 @@ const Home = () => {
     },
   ]);
   const [currentMessage, setCurrentMessage] = useState("");
-  const [checkpointId, setCheckpointId] = useState(null);
+  const [checkpointId, setCheckpointId] = useState<string | null>(null);
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (currentMessage.trim()) {
       // First add the user message to the chat
@@ -93,11 +93,11 @@ const Home = () => {
         // Connect to SSE endpoint using EventSource
         const eventSource = new EventSource(url);
         let streamedContent = "";
-        let searchData = null;
+        let searchData: SearchInfo | null = null;
         let hasReceivedContent = false;
 
         // Process incoming messages
-        eventSource.onmessage = (event) => {
+        eventSource.onmessage = (event: MessageEvent) => {
           console.log("🔍 Raw event data:", event.data); // Debug log
 
           try {
@@ -123,7 +123,7 @@ const Home = () => {
               );
             } else if (data.type === "search_start") {
               console.log("✅ Search started:", data.query);
-              const newSearchInfo = {
+              const newSearchInfo: SearchInfo = {
                 stages: ["searching"],
                 query: data.query,
                 urls: [],
@@ -145,12 +145,12 @@ const Home = () => {
             } else if (data.type === "search_results") {
               console.log("✅ Search results received:", data.urls);
               try {
-                const urls =
+                const urls: string[] =
                   typeof data.urls === "string"
                     ? JSON.parse(data.urls)
                     : data.urls;
 
-                const newSearchInfo = {
+                const newSearchInfo: SearchInfo = {
                   stages: searchData
                     ? [...searchData.stages, "reading"]
                     : ["reading"],
@@ -177,7 +177,7 @@ const Home = () => {
             } else if (data.type === "end") {
               console.log("✅ Stream ended");
               if (searchData) {
-                const finalSearchInfo = {
+                const finalSearchInfo: SearchInfo = {
                   ...searchData,
                   stages: [...searchData.stages, "writing"],
                 };
@@ -263,7 +263,7 @@ const Home = () => {
         };
 
         // Handle errors
-        eventSource.onerror = (error) => {
+        eventSource.onerror = (error: Event) => {
           console.error("❌ EventSource error:", error);
           console.log("EventSource readyState:", eventSource.readyState);
           eventSource.close();

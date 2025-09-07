@@ -1,0 +1,13 @@
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.log
+.env
+.venv/
+venv/
+logs/
+test.ipynb
+.git
+.gitignore
+.dockerignore
