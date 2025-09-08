@@ -209,3 +209,5 @@ __marimo__/
 # my files
 rough
 logs
+k8s/secret.yml
+# NOTES.md

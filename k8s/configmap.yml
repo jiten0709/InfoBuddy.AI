@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: infobuddy-config
+  namespace: infobuddy
+data:
+  MODEL_NAME: "gemini-2.5-flash"
+  RATE_LIMIT_PER_MINUTE: "30"
+  REQUEST_TIMEOUT: "120"

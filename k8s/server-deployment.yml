@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: infobuddy-server
+  namespace: infobuddy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: infobuddy-server
+  template:
+    metadata:
+      labels:
+        app: infobuddy-server
+    spec:
+      containers:
+        - name: server
+          image: jitennn07/infobuddy-server-k8s:v1 # placeholder
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8000
+          envFrom:
+            - configMapRef:
+                name: infobuddy-config
+            - secretRef:
+                name: infobuddy-secrets
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 8
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 15
+            periodSeconds: 15
+            timeoutSeconds: 3
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: "1"
+              memory: 512Mi

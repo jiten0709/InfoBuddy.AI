@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: infobuddy-client
+  namespace: infobuddy
+spec:
+  type: ClusterIP
+  selector:
+    app: infobuddy-client
+  ports:
+    - name: http
+      port: 3000
+      targetPort: 3000
